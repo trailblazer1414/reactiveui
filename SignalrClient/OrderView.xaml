@@ -1,0 +1,480 @@
+﻿<controls:MetroWindow x:Class="SignalrClient.OrderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:iconPacks="clr-namespace:MahApps.Metro.IconPacks;assembly=MahApps.Metro.IconPacks.Ionicons" 
+             xmlns:local="clr-namespace:SignalrClient" xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <controls:MetroWindow.Resources>
+        <iconPacks:Ionicons x:Key="iconSmblFilt" Width="12" Height="12" Kind="FlagMD"  />
+        <iconPacks:Ionicons x:Key="iconSmblNoFilt" Width="12" Height="12" Kind="AddCircleMD"  />
+        <iconPacks:Ionicons x:Key="iconAlgoFilt" Width="12" Height="12" Kind="FlagMD"  />
+        <iconPacks:Ionicons x:Key="iconAlgoNoFilt" Width="12" Height="12" Kind="AddCircleMD"  />
+
+        <Style x:Key="ColumnHeader" 
+               BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}" 
+               TargetType="{x:Type DataGridColumnHeader}">
+            <Setter Property="controls:ControlsHelper.ContentCharacterCasing" Value="Normal"/>
+            <Setter Property="FontSize" Value="11"></Setter>
+            <Setter Property="Height" Value="Auto"></Setter>
+        </Style>
+
+        <Style x:Key="CustomFlyOut"
+              TargetType="{x:Type controls:Flyout}">
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Width" Value="500" />
+            <Setter Property="AnimateOnPositionChange" Value="True" />
+            <Setter Property="AnimateOpacity" Value="True" />
+            <Setter Property="Opacity" Value="100" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.ThemeForeground}" />
+            <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.ThemeForeground}" />
+        </Style>
+
+        <Style x:Key="FiltBtnStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MahApps.Styles.Button.Circle}">
+            <Setter Property="Height" Value="18" />
+            <Setter Property="Width" Value="18" />
+        </Style>
+    </controls:MetroWindow.Resources>
+
+    <controls:MetroWindow.Flyouts>
+        <controls:FlyoutsControl>
+            <controls:Flyout IsOpen="{Binding IsAlgoFilterOpen}"
+                        Width="Auto"
+                        MaxWidth="1000"
+                        Header="Filter by Algos"
+                         Style="{StaticResource CustomFlyOut}"
+                        CloseCommand="{Binding CloseFiltCommand}"
+                        >
+                <Grid>
+                    <Border BorderBrush="Black" BorderThickness="2">
+                        <Grid Background="Black">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20" />
+                                <RowDefinition Height="0.9*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,5" DockPanel.Dock="Left" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                <CheckBox IsChecked="{Binding DataContext.IsAllAlgoSel, Mode=TwoWay, RelativeSource={RelativeSource  AncestorType={x:Type controls:Flyout}}, 
+                                    UpdateSourceTrigger=PropertyChanged}" Content="All Algos" Command="{Binding DataContext.SelAllFiltCommand, RelativeSource={RelativeSource  AncestorType={x:Type controls:Flyout}}, UpdateSourceTrigger=PropertyChanged}"
+                                    CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}" Margin="0" />
+                            </StackPanel>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="0">
+                                <ListBox Name="filtrAlgo" SelectionMode="Extended" 
+                                 ItemsSource="{Binding AlgoCollection}" 
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Top"
+                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"        
+                                 ScrollViewer.CanContentScroll="False"
+                                 Height="{Binding ActualHeight, ElementName=bordGrid}"
+                                 Margin="0,0,0,15"
+                                 Padding="0,0,0,15"
+                                 >
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel Orientation="Vertical" IsItemsHost="True" />
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Path=Description}" Margin="2"
+                                                IsChecked="{Binding Path=IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                Style="{DynamicResource MahApps.Styles.CheckBox}"
+                                                Command="{Binding  RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=DataContext.ValidateFiltCommand}"
+                                                CommandParameter="{Binding DataContext, RelativeSource={RelativeSource Self}}"
+                                                />
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+            </controls:Flyout>
+            <controls:Flyout IsOpen="{Binding IsSmblFilterOpen}"
+                        Header="Filter by Smbls"
+                        Style="{StaticResource CustomFlyOut}"
+                        CloseCommand="{Binding CloseFiltCommand}"
+                        Width="Auto"
+                        MaxWidth="1000"     
+                        >
+                <Grid>
+                    <Border BorderBrush="Black" BorderThickness="2">
+                        <Grid Background="Black">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20" />
+                                <RowDefinition Height="0.9*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,5" DockPanel.Dock="Left" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                <CheckBox IsChecked="{Binding DataContext.IsAllSmblSel, Mode=TwoWay, RelativeSource={RelativeSource  AncestorType={x:Type controls:Flyout}}, 
+                                    UpdateSourceTrigger=PropertyChanged}" Content="All Smbls" Command="{Binding DataContext.SelAllFiltCommand, RelativeSource={RelativeSource  AncestorType={x:Type controls:Flyout}}, UpdateSourceTrigger=PropertyChanged}"
+                                    CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}" Margin="0" />
+                            </StackPanel>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="0">
+                                <ListBox Name="filtrSmbl" SelectionMode="Extended" 
+                                 ItemsSource="{Binding SmblCollection}" 
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Top"
+                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"        
+                                 ScrollViewer.CanContentScroll="False"
+                                 Height="{Binding ActualHeight, ElementName=bordGrid}"
+                                 Margin="0,0,0,15"
+                                 Padding="0,0,0,15"
+                                 >
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel Orientation="Vertical" Width="Auto" VerticalAlignment="Top" Height="{Binding ActualHeight, ElementName=filtrSmbl}" />
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Path=Description}" Margin="2"
+                                                IsChecked="{Binding Path=IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                Style="{DynamicResource MahApps.Styles.CheckBox}"
+                                                Command="{Binding  RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=DataContext.ValidateFiltCommand}"
+                                                CommandParameter="{Binding DataContext, RelativeSource={RelativeSource Self}}"
+                                                Height="20" />
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+            </controls:Flyout>
+        </controls:FlyoutsControl>
+    </controls:MetroWindow.Flyouts>
+    <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+
+            <Border BorderThickness="1" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" Background="{DynamicResource MahApps.Brushes.Gray7}"  CornerRadius="6">
+                <StackPanel Orientation="Horizontal" Margin="10,2,10,2" VerticalAlignment="Top">
+                <TextBlock Text="Search" />
+                <TextBox x:Name="SearchBox" HorizontalAlignment="Left"
+                             Height="15"
+                             Width="150"
+                             Margin="4 0 0 0"
+                             Style="{DynamicResource MahApps.Styles.TextBox}"
+                             Text="{Binding SearchText,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <controls:ToggleSwitch OnContent="Live Orders" OffContent="All Orders" IsOn="{Binding IsLive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="30" />
+
+                </StackPanel>
+            </Border>
+
+
+            <Border BorderThickness="1" Margin="0" Grid.Row="1" Grid.Column="0" BorderBrush="{DynamicResource MahApps.Brushes.ThemeForeground}" Name="bordGrid">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <DataGrid Name="allOrders"
+                          EnableRowVirtualization="True"
+                          EnableColumnVirtualization="True"
+                          AutoGenerateColumns="False" 
+                          VerticalAlignment="Top"
+                          RowHeight="19"
+                          AlternationCount="2"
+                          GridLinesVisibility="All"
+                          Grid.Row="0" Grid.Column="0"
+                          ItemsSource="{Binding OrdCollection}" 
+                          ColumnHeaderStyle="{StaticResource ColumnHeader}"
+                          IsReadOnly="True"
+                          Margin="2">
+
+
+                        <DataGrid.InputBindings>
+                            <MouseBinding
+                            MouseAction="LeftDoubleClick"
+                            Command="{Binding ChildOrderCommand}"
+                            CommandParameter="{Binding ElementName=allOrders, Path=SelectedItem }"/>
+                        </DataGrid.InputBindings>
+                        <DataGrid.Style>
+                            <Style TargetType="DataGrid">
+                                <Setter Property="RowHeight" Value="19"/>
+                            </Style>
+                        </DataGrid.Style>
+                        <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow}">
+                            <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.ThemeForeground}" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Status}" Value="CXLD">
+                                    <Setter Property="Background" Value="#FFF4C861"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="FILLED">
+                                    <Setter Property="Background" Value="LightGray"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="REJD">
+                                    <Setter Property="Background" Value="#FF8C4A04"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="STOPPED">
+                                    <Setter Property="Background" Value="#FFD9291C"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="OrdTime" SortMemberPath="OrdTime" Binding="{Binding Path=OrdTime}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="HorizontalAlignment" Value="Left" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTemplateColumn Header="Algo" SortMemberPath="Algo">
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Name="PanelAlgo" Orientation="Horizontal" >
+                                            <Button Command="{Binding DataContext.FiltAlgoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Margin="5">
+                                            <Button.Style>
+                                                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource FiltBtnStyle}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext.IsAllAlgoSel, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="false">
+                                                            <Setter Property="Content" Value="{StaticResource iconAlgoFilt}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding DataContext.IsAllAlgoSel, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="true">
+                                                            <Setter Property="Content" Value="{StaticResource iconAlgoNoFilt}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                            <TextBlock VerticalAlignment="Center"
+                                                TextAlignment="Center"
+                                                Text="Algo"
+                                                TextWrapping="NoWrap" 
+                                                />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Algo}" VerticalAlignment="Center"></TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Side" SortMemberPath="Side">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Side}" VerticalAlignment="Center"></TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Symbol" SortMemberPath="Smbl">
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Name="PanelSmbl" Orientation="Horizontal" >
+                                            <Button Command="{Binding DataContext.FiltSmblCommand, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" Margin="5">
+                                            <Button.Style>
+                                                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource FiltBtnStyle}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext.IsAllSmblSel, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="false">
+                                                            <Setter Property="Content" Value="{StaticResource iconSmblFilt}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding DataContext.IsAllSmblSel, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="true">
+                                                            <Setter Property="Content" Value="{StaticResource iconSmblNoFilt}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                            <TextBlock VerticalAlignment="Center"
+                                                TextAlignment="Center"
+                                                Name="txtMon"
+                                                Text="Smbl"
+                                                TextWrapping="NoWrap" 
+                                                />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Smbl}" VerticalAlignment="Center"></TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+
+                            <DataGridTemplateColumn Header="LimitPrice" SortMemberPath="LimitPrice">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding LimitPrice}" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+
+
+                            <DataGridTemplateColumn Header="OrdSize" SortMemberPath="OrdSize">
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Vertical">
+                                                <TextBlock VerticalAlignment="Center"
+                                                TextAlignment="Center"
+                                                Text="OrdSize"
+                                                TextWrapping="NoWrap" 
+                                                />
+                                                <TextBlock Margin="0,0,0,-2" Text="{Binding DataContext.OrdsizeTotal, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" FontSize="9" Foreground="Green" />
+                                        </StackPanel>
+                                        
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding OrdSize}" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="ExecShares" SortMemberPath="ExecSharesCum" Binding="{Binding Path=ExecSharesCum}">
+                                <!--<DataGridTextColumn.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Style.Triggers>
+                                        <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <ColorAnimation Storyboard.TargetProperty="Background.(SolidColorBrush.Color)" AutoReverse="True" To="LawnGreen" Duration="0:0:0.2"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGridTextColumn.CellStyle>-->
+                                <DataGridTextColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Vertical" VerticalAlignment="Top" Margin="0,0,5,5">
+                                            <TextBlock VerticalAlignment="Top"
+                                                TextAlignment="Center"
+                                                Text="ExecShares"
+                                                TextWrapping="NoWrap" 
+                                                />
+                                            <TextBlock Margin="0,0,0,0" Text="{Binding DataContext.ExecSharesTotal, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" FontSize="9" Foreground="Green" VerticalAlignment="Bottom" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTextColumn.HeaderTemplate>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="ExecNotl" SortMemberPath="ExecNotl" Binding="{Binding Path=ExecNotl}">
+                                <DataGridTextColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Vertical" Margin="0,0,5,5">
+                                            <TextBlock VerticalAlignment="Top"
+                                                TextAlignment="Center"
+                                                Text="ExecNotl"
+                                                TextWrapping="NoWrap" 
+                                                />
+                                            <TextBlock Margin="0,0,0,-2" Text="{Binding DataContext.ExecNotlTotal, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" FontSize="9" Foreground="Green" VerticalAlignment="Bottom" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTextColumn.HeaderTemplate>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="AvgPrice" SortMemberPath="AvgPriceCum" Binding="{Binding Path=AvgPriceCum}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="%Done" CanUserSort="True" SortMemberPath="PctDone" Binding="{Binding PctDone}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Leaves" SortMemberPath="Leaves" Binding="{Binding Path=Leaves}">
+                                <DataGridTextColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Vertical" Margin="0,0,5,5">
+                                            <TextBlock VerticalAlignment="Top"
+                                                TextAlignment="Center"
+                                                Text="Leaves"
+                                                TextWrapping="NoWrap" 
+                                                />
+                                            <TextBlock Margin="0,0,0,-2" Text="{Binding DataContext.LeavesTotal, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" FontSize="9" Foreground="Green" VerticalAlignment="Bottom" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTextColumn.HeaderTemplate>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+
+                            <DataGridTextColumn Header="Notl" SortMemberPath="Notl" Binding="{Binding Path=Notl}">
+                                <DataGridTextColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Vertical" Margin="0,0,5,5">
+                                            <TextBlock VerticalAlignment="Top"
+                                                TextAlignment="Center"
+                                                Text="Notl"
+                                                TextWrapping="NoWrap" 
+                                                />
+                                            <TextBlock Margin="0,0,0,-2" Text="{Binding DataContext.NotlTotal, RelativeSource={RelativeSource AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" FontSize="9" Foreground="Green" VerticalAlignment="Bottom" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTextColumn.HeaderTemplate>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+</controls:MetroWindow>
