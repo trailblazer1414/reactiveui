@@ -422,7 +422,18 @@
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
 
-                            <DataGridTextColumn Header="%Done" CanUserSort="True" SortMemberPath="PctDone" Binding="{Binding PctDone}">
+                        <DataGridTextColumn Header="Status" SortMemberPath="Status" Binding="{Binding Path=Status}">
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="StartSub" SortMemberPath="StartSub" Binding="{Binding Path=StartSub}">
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="StartAlgo" SortMemberPath="StartAlgo" Binding="{Binding Path=StartAlgo}">
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Rsn" SortMemberPath="Rsn" Binding="{Binding Path=Rsn}">
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="%Done" CanUserSort="True" SortMemberPath="PctDone" Binding="{Binding PctDone}">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="{x:Type TextBlock}">
                                         <Setter Property="HorizontalAlignment" Value="Right" />

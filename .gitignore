@@ -3,3 +3,7 @@
 ################################################################################
 
 /.vs/Signalr/v16
+/SignalrClient/bin/Debug/netcoreapp3.1
+/SignalrClient/obj
+/SignalrServer/bin/Debug/netcoreapp3.1
+/SignalrServer/obj

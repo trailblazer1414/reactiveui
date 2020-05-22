@@ -33,6 +33,13 @@ namespace SignalrServer
             set => _OrdSize = value;
         }
 
+        private bool _isActive;
+        public bool IsActive
+        {
+            get => _isActive;
+            set => _isActive = value;
+        }
+
         private double _LimitPrice;
         public double LimitPrice
         {
@@ -54,11 +61,32 @@ namespace SignalrServer
             set => _ExecShrsCum = value;
         }
 
+        private double _AvgPriceCum;
+        public double AvgPriceCum
+        {
+            get => _AvgPriceCum;
+            set => _AvgPriceCum = value;
+        }
+
         private string _OrderId;
         public string OrderId
         {
             get => _OrderId;
             set => _OrderId = value;
+        }
+
+        private string _Status;
+        public string Status
+        {
+            get => _Status;
+            set => _Status = value;
+        }
+
+        private string _Rsn;
+        public string Rsn
+        {
+            get => _Rsn;
+            set => _Rsn = value;
         }
 
     }

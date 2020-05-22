@@ -17,13 +17,6 @@ namespace SignalrClient.ViewModel
         public IObservable<bool> IsReadyToBeRemovedChanged => _isReadyToRemovedSubject.AsObservable();
 
 
-        private void SetExecsDerivedFields()
-        {
-            this.Leaves = this.OrdSize - this.ExecSharesCum;
-            this.PctDone = this.ExecSharesCum * 100.0 / this.OrdSize;
-            this.ExecNotl = AvgPriceCum * ExecSharesCum ;
-        }
-
         public double _PctDone;
         public double PctDone
         {
@@ -114,6 +107,14 @@ namespace SignalrClient.ViewModel
             set => SetAndRaise(ref _Status, value);
         }
 
+
+        private string _Rsn;
+        public string Rsn
+        {
+            get => _Rsn;
+            set => SetAndRaise(ref _Rsn, value);
+        }
+
         private bool _IsActive;
         public bool IsActive
         {
@@ -155,21 +156,21 @@ namespace SignalrClient.ViewModel
         public string StartAlgo
         {
             get => _StartAlgo;
-            set => _StartAlgo = value;
+            set => SetAndRaise(ref _StartAlgo, value);
         }
 
         private string _StartSub;
         public string StartSub
         {
             get => _StartSub;
-            set => _StartSub = value;
+            set => SetAndRaise(ref _StartSub, value);
         }
 
         private string _FreeText;
         public string FreeText
         {
             get => _FreeText;
-            set => _FreeText = value;
+            set => SetAndRaise(ref _FreeText, value);
         }
 
         public bool Equals(Order obj)

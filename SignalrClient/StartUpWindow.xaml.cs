@@ -55,14 +55,14 @@ namespace SignalrClient
                 _cache.initOrdersBlock.Post(orders);
             });
 
-            _connection.On<OrderUpd>("SendExec", (exec) =>
+            _connection.On<OrderUpd>("SendOrderUpd", (exec) =>
             {
 
                 _cache.orderExecBufBlock.SendAsync(exec);
 
             });
 
-            _connection.On<OrderOtherUpd>("SendStratUpd", (strat) =>
+            _connection.On<OrderOtherUpd>("SendOrderOtherUpd", (strat) =>
             {
                 _cache.stratMsgBlock.Post(strat);
             });

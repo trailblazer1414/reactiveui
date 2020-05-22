@@ -16,6 +16,8 @@ namespace SignalrServer
     {
         Task SendOrder(Order ord);
         Task SendInitOrders(List<Order> ord);
+        Task SendOrderUpd(OrderUpd ord);
+        Task SendOrderOtherUpd(OrderOtherUpd order);
     }
 
     [Authorize]

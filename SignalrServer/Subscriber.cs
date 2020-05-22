@@ -27,10 +27,15 @@ namespace SignalrServer
                                                 new Tuple<string, double>("AAPL", 318.85),
                                                 new Tuple<string, double>("AMZN", 2480.06),
                                                 new Tuple<string, double>("NFLX", 450.33),
-                                                new Tuple<string, double>("GOOG", 1401.70)
+                                                new Tuple<string, double>("GOOG", 1401.70),
+                                                new Tuple<string, double>("MSFT", 101.70)
                                                 };
-        private int[] _ordsize = new int[] { 2000, 5000, 2500, 10000, 1200 };
-        private string[] _algo = new string[] { "GM", "VWAP", "TWAP", "REV", "FN" };
+        private int[] _ordsize = new int[] { 2000, 5000, 2500, 10000, 1200, 10500 };
+        private int[] _execs = new int[] { 100, 500, 250, 150, 120, 10 };
+        private double[] _pxs = new double[] { 228.5, 300.76, 2480.55, 454.25, 125.55, 1099.10 };
+        private string[] _algo = new string[] { "GM", "VWAP", "TWAP", "REV", "FN", "AB" };
+        private string[] _rsns = new string[] { "BAD", "NOPE", "WHAT", "OCCUR", "THIS", "SICK" };
+        private string[] _stats = new string[] { "NEW", "PART", "FILLED", "CXLD", "REJD", "PART", "FILLED", "PART", "PART" };
         private string[] _side = new string[] { "B", "S", "SS" };
         private CacheContainer _cache;
 
@@ -45,11 +50,12 @@ namespace SignalrServer
         private void MakeConnection()
         {
             
-            Observable.Interval(TimeSpan.FromMilliseconds(137)).Subscribe((y) =>
+            Observable.Interval(TimeSpan.FromMilliseconds(107)).Subscribe((y) =>
             {
                 var order = GetRandomOrder();
                 if(_cache.OrderCollection.TryAdd(order.OrderId, order))
                     _hubContext.Clients.All.SendOrder(order);
+               
             });
 
             Observable.Interval(TimeSpan.FromMilliseconds(229)).Subscribe((y) =>
@@ -57,13 +63,56 @@ namespace SignalrServer
                 var order = GetRandomOrder();
                 if (_cache.OrderCollection.TryAdd(order.OrderId, order))
                     _hubContext.Clients.All.SendOrder(order);
+               
             });
 
             Observable.Interval(TimeSpan.FromMilliseconds(397)).Subscribe((y) =>
             {
-                var order = GetRandomOrder();
-                if (_cache.OrderCollection.TryAdd(order.OrderId, order))
-                    _hubContext.Clients.All.SendOrder(order);
+                var ordUp = GetRandomOrderOtherUpd();
+                _hubContext.Clients.All.SendOrderOtherUpd(ordUp);
+            });
+
+            Observable.Interval(TimeSpan.FromMilliseconds(297)).Subscribe((y) =>
+            {
+                var ordUp = GetRandomOrderOtherUpd();
+                _hubContext.Clients.All.SendOrderOtherUpd(ordUp);
+            });
+
+            Observable.Interval(TimeSpan.FromMilliseconds(229)).Subscribe((y) =>
+            {
+                var order = GetRandomOrderUpd();
+                _cache.UpdateOrder(order);
+                _hubContext.Clients.All.SendOrderUpd(order);
+
+            });
+
+            Observable.Interval(TimeSpan.FromMilliseconds(179)).Subscribe((y) =>
+            {
+                var order = GetRandomOrderUpd();
+                _cache.UpdateOrder(order);
+                _hubContext.Clients.All.SendOrderUpd(order);
+
+            });
+
+            Observable.Interval(TimeSpan.FromMilliseconds(259)).Subscribe((y) =>
+            {
+                var order = GetRandomOrderUpd();
+                _cache.UpdateOrder(order);
+                _hubContext.Clients.All.SendOrderUpd(order);
+            });
+
+            Observable.Interval(TimeSpan.FromMilliseconds(339)).Subscribe((y) =>
+            {
+                var order = GetRandomOrderUpd();
+                _cache.UpdateOrder(order);
+                _hubContext.Clients.All.SendOrderUpd(order);
+
+            });
+
+            Observable.Interval(TimeSpan.FromMilliseconds(239)).Subscribe((y) =>
+            {
+                var order = GetRandomOrderOtherUpd();
+                _hubContext.Clients.All.SendOrderOtherUpd(order);
             });
         }
 
@@ -96,7 +145,47 @@ namespace SignalrServer
             order.Side = _side[random.Next(_side.Count())];
             return order;
         }
-  
+        private OrderUpd GetRandomOrderUpd()
+        {
+            var random = new Random();
+            if (_cache.OrderCollection.Count == 0)
+                return null;
+            int index = random.Next(_cache.OrderCollection.Count);
+            string od = _cache.OrderCollection.Keys.ToList()[index];
+            var order = new OrderUpd()
+            {
+                Orderid = od,
+                ExecShares = _execs[random.Next(_execs.Count())],
+                ExecPrice = _pxs[random.Next(_pxs.Count())],
+                CxlReason = _rsns[random.Next(_rsns.Count())],
+                ExecTime = DateTime.Now.ToShortTimeString(),
+                Status = _stats[random.Next(_stats.Count())],
+            };
+
+            
+            return order;
+        }
+
+        private OrderOtherUpd GetRandomOrderOtherUpd()
+        {
+            var random = new Random();
+            int index = random.Next(_cache.OrderCollection.Count);
+            string od = _cache.OrderCollection.Keys.ToList()[index];
+            var order = new OrderOtherUpd()
+            {
+                OrdId = od,
+                LastMkt = _rsns[random.Next(_rsns.Count())],
+                Mode = "START",
+                FreeText = "Quick brown fox",
+                StartAlg = _algo[random.Next(_algo.Count())],
+                UpdTime = DateTime.Now,
+                StartSub = DateTime.Now.ToShortTimeString()
+            };
+
+
+            return order;
+        }
+
     }
 
 }

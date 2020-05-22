@@ -45,7 +45,8 @@ namespace SignalrClient.Container
                 orderRelayBlock.Post(ord);
                 _ordersMap.TryAdd(ord.OrderId, ord);
                 ord.IsActive = true;
-
+                ord.Notl = ord.OrdSize * ord.LimitPrice;
+                ord.Leaves = ord.OrdSize - ord.ExecSharesCum;
             }
 
             catch (Exception ex)
@@ -159,7 +160,8 @@ namespace SignalrClient.Container
                         else if (!_ordersMap.ContainsKey(delta.OrderId))
                         {
                             _ordersMap.TryAdd(delta.OrderId, delta);
-
+                            delta.Notl = delta.OrdSize * delta.LimitPrice;
+                            delta.Leaves = delta.OrdSize - delta.ExecSharesCum;
                         }
                     }
                     catch (Exception ex)
@@ -228,14 +230,14 @@ namespace SignalrClient.Container
         }
         public void ProcessOrderExec(OrderUpd ex, Order ord)
         {
-            if (ord.IsActive)
-            {
-                if (ord.ExecSharesCum <= ex.ExecShares)
-                {
-                    ord.AvgPriceCum = ex.ExecPrice;
-                    ord.ExecSharesCum = ex.ExecShares;
-                }
-            }
+            
+                
+            ord.AvgPriceCum = ex.ExecPrice;
+            ord.ExecSharesCum = ex.ExecShares;
+            ord.ExecNotl = ex.ExecPrice * ex.ExecShares;
+            ord.Leaves = ord.OrdSize - ex.ExecShares;
+            ord.Status = ex.Status;    
+            
 
             if (ord.ExecSharesCum == ord.OrdSize || ex.Status == "FILLED")
             {
@@ -253,6 +255,7 @@ namespace SignalrClient.Container
                 if (_ordersMap.TryGetValue(orderexec.Orderid, out ord))
                 {
                     ord.Status = orderexec.Status;
+                    ord.Rsn = orderexec.CxlReason;
                     ord.IsActive = false;
                     inactiveOrdBlock.Post(ord);
                 }
@@ -312,10 +315,7 @@ namespace SignalrClient.Container
         private void ProcessOrderWithStratMsg(OrderOtherUpd strat, Order ord)
         {
             //ord.StratDetails = msg;
-            if (ord.IsActive)
-            {
-                ord.Status = strat.Mode;
-            }
+            ord.Status = strat.Mode;
             ord.StartAlgo = strat.StartAlg;
             ord.StartSub = strat.StartSub;
             ord.FreeText = strat.FreeText;
